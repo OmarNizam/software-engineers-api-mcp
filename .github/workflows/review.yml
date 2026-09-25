@@ -1,0 +1,45 @@
+name: Security Review Gate
+
+# Fails the check unless Claude returns PASS. Runs alongside claude-code-review.yml
+# (which only comments). Same-repo PRs only: fork PRs get no secrets anyway, and
+# we do not want a fork-controlled diff steering a CLI that holds a token.
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  review:
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - run: npm i -g @anthropic-ai/claude-code
+
+      - name: Review diff
+        env:
+          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          BASE_REF: ${{ github.base_ref }}
+        run: |
+          git diff "origin/${BASE_REF}...HEAD" > pr.diff
+          claude -p "Review pr.diff (the diff of this PR) for security and mass-assignment issues. Reply with PASS or BLOCK on the first line, then findings." \
+            --allowedTools "Read,Grep" --disallowedTools "Read(/proc/**)" \
+            --setting-sources user --max-turns 10 > review.md
+          cat review.md
+          head -n 1 review.md | grep -q '^PASS' || { echo "Review verdict was not PASS"; exit 1; }
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: review
+          path: review.md
