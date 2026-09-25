@@ -1,0 +1,11 @@
+{
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          { "type": "command", "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/compile-on-stop.sh", "timeout": 180 }
+        ]
+      }
+    ]
+  }
+}
