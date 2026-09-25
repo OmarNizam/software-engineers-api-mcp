@@ -19,6 +19,8 @@ Claude is authorized to run `gh pr merge --squash --delete-branch` and `git conf
 
 Never run `docker compose down` (with or without a service name) — it tears down the shared network and kills the app the user runs from IntelliJ. Use `docker compose stop <service>` or `docker compose restart <service>` instead. Before starting containers, check for port conflicts on 8080/443/80/5332 and kill only stale test containers.
 
+This ban is for Claude. The README's `docker compose down -v && ./mvnw spring-boot:run` reset is a command for the user to run, not something Claude runs on its own. Claude resets the database only when the user explicitly asks for a reset in that message: `docker compose rm -sf db`, then remove the `postgres_data` volume by its exact name, taken from `docker volume ls` (the name is prefixed with the compose project, which differs per worktree). `rm -v` alone does not remove that named volume.
+
 ## Testing
 
 Run `./mvnw test` plus the JaCoCo coverage report via the unit-tester subagent before every push; the pre-push hook expects a green build and a real review report. Add or verify tests for any new endpoint before opening the PR.
