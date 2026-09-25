@@ -9,6 +9,28 @@ API and — via Spring AI 2.0.1 — as an MCP (Model Context Protocol) server.
 *why* it is wired the way it is and the non-obvious behaviour — read it before
 changing the persistence layer, the compose setup, or the seeder.
 
+## Git & PR Workflow
+
+For every change: create a worktree + feature branch, commit logically-separated changes, push, open a PR, run the code-reviewer subagent, then merge and clean up the worktree and local branch. Never commit directly to main.
+
+Claude is authorized to run `gh pr merge --squash --delete-branch` and `git config` in this repo after the code-reviewer subagent returns a passing verdict. Do not ask the user to run merge commands manually.
+
+## Docker / Local Dev Rules
+
+Never run `docker compose down` (with or without a service name) — it tears down the shared network and kills the app the user runs from IntelliJ. Use `docker compose stop <service>` or `docker compose restart <service>` instead. Before starting containers, check for port conflicts on 8080/443/80/5332 and kill only stale test containers.
+
+## Testing
+
+Run `./mvnw test` plus the JaCoCo coverage report via the unit-tester subagent before every push; the pre-push hook expects a green build and a real review report. Add or verify tests for any new endpoint before opening the PR.
+
+## Stack & Conventions
+
+This project targets Spring Boot 4 — use Boot 4 property keys (e.g. `spring.web.error.*`), not Boot 3 equivalents. Keep `spring.jpa.hibernate.ddl-auto=update`; never set it to `create-drop`.
+
+## Hooks & Scripts
+
+Shell scripts and git hooks must be bash 3.2 compatible (macOS default): no heredocs inside functions, no slow parameter-expansion idioms, and hooks must fail-open with a clear message rather than blocking silently.
+
 ## Commands
 
 ```bash
@@ -159,5 +181,7 @@ authoritative gate on the **pushed ref**. Keep the two Postgres setups
 (`compose.yaml` port mapping / DB credentials and `ci.yml`'s `services:` block)
 in sync.
 
+`review.yml` is a fail-closed security-review gate: it runs the `claude` CLI on the PR
+diff (same-repo PRs only, `Read,Grep` tools) and fails unless the first line is `PASS`.
 The other two workflows (`claude.yml`, `claude-code-review.yml`) are the Claude
 GitHub App boilerplate — unrelated to build/test.
