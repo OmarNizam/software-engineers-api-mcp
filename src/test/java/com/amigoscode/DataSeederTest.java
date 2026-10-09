@@ -43,7 +43,7 @@ class DataSeederTest {
 
         verify(softwareEngineerRepository).saveAll(engineersCaptor.capture());
         assertThat(engineersCaptor.getValue())
-                .extracting(SoftwareEngineer::getName, SoftwareEngineer::getTechStack)
+                .extracting(e -> e.getName(), e -> e.getTechStack())
                 .containsExactly(
                         tuple("James", List.of("js, node, vue, java, spring boot")),
                         tuple("Jamila", List.of("js, node, vue, python, FastApi"))
