@@ -23,7 +23,7 @@ public class SoftwareEngineerController {
     private final SoftwareEngineerService softwareEngineerService;
 
     public SoftwareEngineerController(SoftwareEngineerService softwareEngineerService) {
-        this.softwareEngineerService =  softwareEngineerService;
+        this.softwareEngineerService = softwareEngineerService;
     }
 
     @GetMapping
@@ -55,14 +55,15 @@ public class SoftwareEngineerController {
         // here: @RestController serialises the body via Jackson as application/json,
         // and Location is a header, not an HTML sink — browsers never render either
         // as markup.
-        //noinspection JvmTaintAnalysis
+        // noinspection JvmTaintAnalysis
         return ResponseEntity.created(location).body(created);
     }
 
     @PutMapping("{id}")
     public SoftwareEngineer updateEngineerById(
             @PathVariable UUID id, @Valid @RequestBody UpdateSoftwareEngineerRequest request) {
-        // Unknown id -> 404, same seam as the read-by-id and delete paths. A non-UUID path
+        // Unknown id -> 404, same seam as the read-by-id and delete paths. A non-UUID
+        // path
         // segment fails type conversion as a default 400 before we get here.
         return softwareEngineerService.updateSoftwareEngineerById(id, request)
                 .orElseThrow(() -> new SoftwareEngineerNotFoundException(id));

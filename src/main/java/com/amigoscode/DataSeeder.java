@@ -17,7 +17,7 @@ public class DataSeeder implements CommandLineRunner {
     }
 
     @Override
-    public void run(String @NonNull ... args) {
+    public void run(String @NonNull... args) {
         if (softwareEngineerRepository.count() > 0) {
             return;
         }
@@ -25,13 +25,10 @@ public class DataSeeder implements CommandLineRunner {
         List<SoftwareEngineer> softwareEngineers = List.of(
                 new SoftwareEngineer(
                         "James",
-                        Collections.singletonList("js, node, vue, java, spring boot")
-                ),
+                        Collections.singletonList("js, node, vue, java, spring boot")),
                 new SoftwareEngineer(
                         "Jamila",
-                        Collections.singletonList("js, node, vue, python, FastApi")
-                )
-        );
+                        Collections.singletonList("js, node, vue, python, FastApi")));
         softwareEngineerRepository.saveAll(softwareEngineers);
     }
 }
